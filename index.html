@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Vibekes telefon</title>
+
+<link rel="apple-touch-icon" sizes="180x180" href="telefon.png" />
+<link rel="apple-touch-icon" href="telefon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Vibekes telefon" />
+<link rel="icon" href="telefon.png" />
+
+<style>
+:root{
+  --bg:#0b1220;
+  --text:#fff;
+  --muted:rgba(255,255,255,.78);
+  --stroke:rgba(255,255,255,.14);
+  --shadow:0 10px 26px rgba(0,0,0,.35);
+  --pad:12px;
+  --gap:10px;
+  --layoutGap:8px;
+  --radius:22px;
+
+  --focusScale:1.03;
+  --unfocusOpacity:.55;
+
+  --btnH:56px;
+  --btnHSmall:46px;
+
+  --focusBorder:5px;
+
+  --avatarBig:clamp(140px, 22vh, 220px);
+
+  --sideColW: min(380px, 27vw);
+  --centerColW: min(560px, 38vw);
+
+  --smallImgFrac: 48%;
+
+  --quietRed:#ff3b3b;
+
+  --groupW: min(260px, 34vw);
+
+  /* ✅ NY: spacing i Peter-feltet (kun luft) */
+  --peterPhoneBottom: 16px;   /* afstand mellem nummer og knapper */
+  --peterBtnGap: 12px;        /* afstand mellem knapper */
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+body{
+  background:
+    radial-gradient(1200px 800px at 50% 0%, rgba(80,140,255,.25), transparent 55%),
+    radial-gradient(900px 600px at 10% 90%, rgba(0,255,170,.10), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  overflow:hidden;
+}
+.page{
+  height:100%;
+  padding:var(--pad);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-items:center;
+  justify-content:flex-start;
+}
+
+/* Header */
+.header{
+  width:100%;
+  display:grid;
+  grid-template-columns: var(--groupW) 1fr var(--groupW);
+  align-items:center;
+  gap:12px;
+  padding-top:4px;
+  user-select:none;
+}
+.iconGroup{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.topIcon{
+  width:52px;height:52px;border-radius:14px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  display:grid;place-items:center;
+  box-shadow:var(--shadow);
+  -webkit-tap-highlight-color:transparent;
+}
+.topIcon img{width:70%;height:70%;object-fit:contain}
+.topIcon.btn{ cursor:pointer; }
+.topIcon.btn:active{ transform:scale(.99); }
+
+h1{
+  margin:0;
+  font-size:clamp(18px,2.2vw,28px);
+  letter-spacing:.2px;
+  text-align:center;
+  justify-self:center;
+}
+
+.stage{
+  position:relative;
+  width:100%;
+  flex:1;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  overflow:hidden;
+}
+
+/* 3-kolonne layout */
+.layout{
+  position:relative;
+  width:min(1600px, 100%);
+  height:100%;
+  display:grid;
+  grid-template-columns: var(--sideColW) var(--centerColW) var(--sideColW);
+  gap:var(--layoutGap);
+  padding:10px;
+  border-radius:28px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+.sideCol{
+  display:grid;
+  grid-template-rows:repeat(4, 1fr);
+  gap:var(--gap);
+  min-height:0;
+}
+.centerCol{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:0;
+}
+
+/* Tiles */
+.tile{
+  position:relative;
+  border-radius:var(--radius);
+  border:1px solid var(--stroke);
+  box-shadow:var(--shadow);
+  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.07));
+  overflow:hidden;
+
+  opacity:var(--unfocusOpacity);
+  transform:scale(.98);
+  filter:saturate(.9);
+  transition:transform 220ms ease, opacity 220ms ease, filter 220ms ease;
+
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+  cursor:pointer;
+  min-height:0;
+}
+.tile.focused{
+  opacity:1;
+  transform:scale(var(--focusScale));
+  filter:saturate(1.05);
+  cursor:default;
+}
+
+/* Peter (center) – lidt højere */
+.tile.big{
+  height: calc(62% - (var(--gap) / 2));
+  aspect-ratio: 1 / 1;
+  width: auto;
+
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+
+/* Små sidekort */
+.tile.small{
+  padding:10px;
+  display:grid;
+  grid-template-columns: var(--smallImgFrac) 1fr;
+  gap:10px;
+  align-items:stretch;
+}
+
+/* Big avatar */
+.avatarBig{
+  width:var(--avatarBig);
+  height:var(--avatarBig);
+  border-radius:999px;
+  overflow:hidden;
+  border:4px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.08);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.32),
+    0 0 0 6px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 0 40px color-mix(in srgb, var(--accent) 40%, transparent);
+  flex-shrink:0;
+  pointer-events:none;
+}
+.avatarBig img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Small photo area */
+.photo{
+  border-radius:18px;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  box-shadow:0 10px 18px rgba(0,0,0,.26);
+  pointer-events:none;
+  position:relative;
+  min-height:0;
+}
+.photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+.photo:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  box-shadow:
+    inset 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent),
+    inset 0 0 28px color-mix(in srgb, var(--accent) 18%, transparent);
+  pointer-events:none;
+}
+
+/* Meta */
+.metaBig{
+  width:100%;
+  text-align:center;
+  padding:0 10px 6px;
+  pointer-events:none;
+}
+.metaSmall{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:6px;
+  padding:2px 2px 2px 0;
+  pointer-events:none;
+}
+.name{ margin:0; font-weight:950; letter-spacing:.2px; line-height:1.05; }
+.name.big{ font-size:clamp(18px, 2.4vh, 26px); }
+.name.small{
+  font-size:clamp(16px, 2.2vh, 22px);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.phone{ margin:0; color:var(--muted); line-height:1.1; }
+.phone.big{ font-size:clamp(12px, 1.8vh, 15px); }
+.phone.small{
+  font-size:clamp(12px, 1.8vh, 15px);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ✅ NY: kun luft (ingen strukturændring) */
+.tile.big .phone.big{ margin-bottom: var(--peterPhoneBottom); }
+
+/* Ring-knap */
+.callBtn{
+  width:100%;
+  height:var(--btnHSmall);
+  border-radius:16px;
+  border:1px solid color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,.16));
+  background:color-mix(in srgb, var(--accent) 32%, rgba(255,255,255,.10));
+  color:#fff;
+  font-weight:950;
+  font-size:16px;
+  letter-spacing:.5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  user-select:none;
+  opacity:.92;
+  pointer-events:none;
+}
+.callBtn:active{ transform:scale(.98); }
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.callBtn.small{ height:var(--btnHSmall); border-radius:14px; justify-content:center; padding:0 12px; }
+.callBtn.big{
+  height:var(--btnH);
+  font-size:18px;
+  border-radius:18px;
+  pointer-events:auto;
+  opacity:1;
+}
+.tile.focused .callBtn.small{ pointer-events:auto; opacity:1; }
+
+/* ✅ NY: afstand mellem de 2 knapper (kun margin-top) */
+.tile.big .callBtn.big.video{ margin-top: var(--peterBtnGap); }
+
+/* Peter: lydopkald grøn */
+.callBtn.big.audio{
+  border-color: rgba(0,208,122,.70);
+  background: linear-gradient(180deg, rgba(0,208,122,.40), rgba(0,208,122,.18));
+}
+.callBtn.big.audio .dot{ background:#00d07a; }
+
+/* Peter: videoopkald blå */
+.callBtn.big.video{
+  border-color: rgba(0,132,255,.70);
+  background: linear-gradient(180deg, rgba(0,132,255,.40), rgba(0,132,255,.18));
+}
+.callBtn.big.video .dot{ background:#0084ff; }
+
+/* Nattero: rød knap på små felter */
+.tile.quiet .callBtn.small{
+  border-color: rgba(255,60,60,.65) !important;
+  background: linear-gradient(180deg, rgba(255,60,60,.35), rgba(255,60,60,.16)) !important;
+}
+.tile.quiet .dot{ background: var(--quietRed) !important; }
+
+/* Fokusramme */
+.focusBox{
+  position:absolute;
+  border-radius:calc(var(--radius) + 10px);
+  border:var(--focusBorder) solid rgba(255,255,255,.92);
+  box-shadow: 0 0 0 7px rgba(0,0,0,.28), 0 18px 60px rgba(0,0,0,.45);
+  pointer-events:none;
+  transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease;
+  will-change:left,top,width,height;
+  z-index:50;
+}
+
+/* Overlay (fælles) */
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#05070c;
+  z-index:9999;
+  padding:18px;
+  -webkit-tap-highlight-color: transparent;
+}
+.overlay.show{ display:flex; }
+.dialog{
+  width:min(920px, 100%);
+  border-radius:28px;
+  border:2px solid rgba(255,255,255,.18);
+  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
+  box-shadow:0 30px 80px rgba(0,0,0,.55);
+  padding:22px;
+  text-align:center;
+}
+
+/* Confirm overlay */
+.dialogTitle{
+  margin:0 0 10px;
+  font-weight:1000;
+  letter-spacing:.8px;
+  font-size:clamp(26px, 4.2vw, 52px);
+  text-transform:uppercase;
+}
+.dialogName{
+  margin:0 0 18px;
+  font-weight:1000;
+  font-size:clamp(22px, 3.4vw, 44px);
+  color:#fff;
+  text-transform:uppercase;
+}
+.dialogHint{
+  margin:0 0 18px;
+  opacity:.85;
+  font-size:clamp(14px, 2.0vw, 20px);
+}
+.btnRow{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+.bigBtn{
+  height:clamp(64px, 10vh, 96px);
+  border-radius:22px;
+  border:2px solid rgba(255,255,255,.18);
+  font-size:clamp(18px, 2.4vw, 30px);
+  font-weight:1000;
+  letter-spacing:.6px;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+  cursor:pointer;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  -webkit-tap-highlight-color: transparent;
+}
+.bigBtn:active{ transform:scale(.99); }
+.yes{
+  background:linear-gradient(180deg, rgba(0,255,140,.38), rgba(0,255,140,.18));
+  border-color:rgba(0,255,140,.55);
+}
+.no{
+  background:linear-gradient(180deg, rgba(255,60,60,.38), rgba(255,60,60,.18));
+  border-color:rgba(255,60,60,.55);
+}
+
+/* Blocked overlay */
+.blockTitle{ margin:0 0 12px; font-weight:1000; letter-spacing:.6px; font-size:clamp(22px, 3.2vw, 44px); text-transform:uppercase; }
+.blockText{ margin:0 0 18px; opacity:.9; font-size:clamp(14px, 2.1vw, 22px); }
+.okRow{ display:flex; justify-content:center; }
+.okBtn{
+  width:min(420px, 100%);
+  height:clamp(64px, 10vh, 96px);
+  border-radius:22px;
+  border:2px solid rgba(255,255,255,.18);
+  font-size:clamp(18px, 2.4vw, 30px);
+  font-weight:1000;
+  letter-spacing:.6px;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+  cursor:pointer;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  background:linear-gradient(180deg, rgba(255,60,60,.30), rgba(255,60,60,.14));
+  border-color:rgba(255,60,60,.55);
+}
+.okBtn:active{ transform:scale(.99); }
+
+/* Virtuel ur modal */
+.vclockTitle{
+  margin:0 0 10px;
+  font-weight:1000;
+  letter-spacing:.6px;
+  font-size:clamp(22px, 3.4vw, 42px);
+  text-transform:uppercase;
+}
+.vclockSub{
+  margin:0 0 16px;
+  opacity:.85;
+  font-size:clamp(14px, 2.0vw, 20px);
+}
+.vclockRow{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  margin: 10px 0 16px;
+}
+.vclockInput{
+  height:56px;
+  padding:0 14px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(0,0,0,.25);
+  color:#fff;
+  font-weight:1000;
+  font-size:18px;
+}
+.vclockActions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+  margin-top:10px;
+}
+.vclockBtnBig{
+  height:clamp(64px, 10vh, 92px);
+  border-radius:22px;
+  border:2px solid rgba(255,255,255,.18);
+  font-size:clamp(18px, 2.4vw, 28px);
+  font-weight:1000;
+  letter-spacing:.6px;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+  cursor:pointer;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  -webkit-tap-highlight-color: transparent;
+}
+.vclockBtnBig:active{ transform:scale(.99); }
+.vclockActivate{
+  background:linear-gradient(180deg, rgba(0,160,255,.38), rgba(0,160,255,.18));
+  border-color:rgba(0,160,255,.55);
+}
+.vclockDeactivate{
+  background:linear-gradient(180deg, rgba(255,180,0,.30), rgba(255,180,0,.14));
+  border-color:rgba(255,180,0,.55);
+}
+.vclockClose{
+  margin-top:14px;
+  height:56px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  font-weight:950;
+  letter-spacing:.4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+/* Responsivt */
+@media (max-width:1100px){
+  .header{ grid-template-columns: 1fr; gap:8px; }
+  .iconGroup{ justify-content:center; width:100%; }
+  .layout{ grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap:var(--gap); }
+  .tile.small{ grid-template-columns: 45% 1fr; }
+}
+@media (max-height:700px){
+  :root{
+    --btnH:52px;
+    --btnHSmall:44px;
+    --avatarBig:clamp(120px, 20vh, 190px);
+    --smallImgFrac: 46%;
+    --gap:9px;
+    --layoutGap:7px;
+  }
+}
+
+/* ✅ Fejl-overlay: vis fejl på skærmen hvis JS crasher */
+.errToast{
+  position:fixed;
+  left:12px; right:12px; bottom:12px;
+  padding:12px 14px;
+  background:rgba(255,60,60,.18);
+  border:1px solid rgba(255,60,60,.45);
+  border-radius:16px;
+  color:#fff;
+  font-weight:800;
+  letter-spacing:.2px;
+  box-shadow:0 18px 50px rgba(0,0,0,.4);
+  display:none;
+  z-index:99999;
+}
+.errToast.show{ display:block; }
+.errToast small{ display:block; opacity:.85; font-weight:600; margin-top:6px; }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <div class="header">
+    <div class="iconGroup" aria-label="Venstre ikoner">
+      <div class="topIcon"><img src="telefon.png" alt=""></div>
+      <div class="topIcon"><img src="telefon.png" alt=""></div>
+      <div class="topIcon"><img src="telefon.png" alt=""></div>
+    </div>
+
+    <h1>Vibekes telefon</h1>
+
+    <div class="iconGroup" aria-label="Højre ikoner">
+      <div class="topIcon"><img src="telefon.png" alt=""></div>
+      <div class="topIcon"><img src="telefon.png" alt=""></div>
+
+      <div class="topIcon btn" id="clockHeaderBtn" aria-label="Virtuel ur (skjult knap)">
+        <img src="telefon.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="layout" id="layout" aria-label="Kontakter">
+      <div class="sideCol" id="leftCol" aria-label="Venstre kontakter"></div>
+      <div class="centerCol" id="centerCol" aria-label="Peter (center)"></div>
+      <div class="sideCol" id="rightCol" aria-label="Højre kontakter"></div>
+
+      <div class="focusBox" id="focusBox" aria-hidden="true"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlayConfirm" aria-hidden="true">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <p class="dialogTitle" id="dlgTitle">Vil du ringe til</p>
+    <p class="dialogName" id="dlgName">Navn</p>
+    <p class="dialogHint">Tryk <b>JA</b> for at ringe, eller <b>NEJ</b> for at fortryde.</p>
+    <div class="btnRow">
+      <div class="bigBtn yes" id="btnYes">JA, RING</div>
+      <div class="bigBtn no" id="btnNo">NEJ</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlayBlocked" aria-hidden="true">
+  <div class="dialog" role="dialog" aria-modal="true">
+    <p class="blockTitle">Kan ikke ringes til</p>
+    <p class="blockText" id="blockedText">Kan ikke ringes til i dette tidsrum.</p>
+    <div class="okRow">
+      <div class="okBtn" id="btnOk">OK</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlayVClock" aria-hidden="true">
+  <div class="dialog" role="dialog" aria-modal="true">
+    <p class="vclockTitle">Virtuel ur</p>
+    <p class="vclockSub" id="vclockStatus">Bruger rigtig tid.</p>
+
+    <div class="vclockRow">
+      <input class="vclockInput" id="vclockTime" type="time" step="60" value="02:00" />
+    </div>
+
+    <div class="vclockActions">
+      <div class="vclockBtnBig vclockActivate" id="vclockActivate">AKTIVÉR</div>
+      <div class="vclockBtnBig vclockDeactivate" id="vclockDeactivate">DEAKTIVÉR</div>
+    </div>
+
+    <div class="vclockClose" id="vclockClose">LUK</div>
+  </div>
+</div>
+
+<audio id="blockedAudio" preload="auto" src="ingenopkaldstemme.mp3"></audio>
+
+<div class="errToast" id="errToast">
+  Der opstod en fejl i koden 😅
+  <small id="errText"></small>
+</div>
+
+<script>
+/* ✅ Vis fejl på skærmen hvis JS crasher */
+const errToast = document.getElementById("errToast");
+const errText  = document.getElementById("errText");
+window.addEventListener("error", (e) => {
+  try{
+    errText.textContent = (e && e.message) ? e.message : "Ukendt fejl";
+    errToast.classList.add("show");
+  }catch(_){}
+});
+
+/* =========================
+   Nattero indstillinger
+   ========================= */
+const QUIET_START = "22:00";
+const QUIET_END   = "08:00";
+
+function parseHHMM(s){
+  const [hh, mm] = s.split(":").map(Number);
+  return (hh * 60) + mm;
+}
+const QUIET_START_MIN = parseHHMM(QUIET_START);
+const QUIET_END_MIN   = parseHHMM(QUIET_END);
+
+/* =========================
+   Virtuel ur state
+   ========================= */
+const SIM_TIME_KEY = "simTimeHHMM";
+const SIM_ON_KEY   = "simTimeEnabled";
+
+function getSimTime(){ return localStorage.getItem(SIM_TIME_KEY); }
+function setSimTime(hhmm){ localStorage.setItem(SIM_TIME_KEY, hhmm); }
+
+function isSimEnabled(){ return localStorage.getItem(SIM_ON_KEY) === "1"; }
+function setSimEnabled(on){
+  if (on) localStorage.setItem(SIM_ON_KEY, "1");
+  else localStorage.removeItem(SIM_ON_KEY);
+}
+
+function getNowMinutes(){
+  if (isSimEnabled()) {
+    const sim = getSimTime();
+    if (sim) return parseHHMM(sim);
+  }
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+function isQuietNow(){
+  const now = getNowMinutes();
+  if (QUIET_START_MIN === QUIET_END_MIN) return false;
+
+  if (QUIET_START_MIN < QUIET_END_MIN){
+    return now >= QUIET_START_MIN && now < QUIET_END_MIN;
+  } else {
+    return (now >= QUIET_START_MIN) || (now < QUIET_END_MIN);
+  }
+}
+
+/* =========================
+   DATA
+   ========================= */
+let contacts = [
+  { name:"Peter", phone:"+4520324378", display:"+45 20 32 43 78", img:"peter.jpg", accent:"#ffd24a", messengerUserId:"542384925" },
+  { name:"Poula", phone:"+4521538213", display:"+45 21 53 82 13", img:"poula.jpg", accent:"#54e6a9" },
+  { name:"Bente", phone:"+4528223687", display:"+45 28 22 36 87", img:"bente.jpg", accent:"#6fb7ff" },
+  { name:"Britta", phone:"+4523985223", display:"+45 23 98 52 23", img:"britta.jpg", accent:"#ff7ad9" },
+  { name:"Else", phone:"+4542769137", display:"+45 42 76 91 37", img:"else.jpg", accent:"#ff9b54" },
+  { name:"Herdis", phone:"+4521764268", display:"+45 21 76 42 68", img:"herdis.jpg", accent:"#b58cff" },
+  { name:"Hanne", phone:"+4528965403", display:"+45 28 96 54 03", img:"hanne.jpg", accent:"#ff4d4d" },
+  { name:"Karen", phone:"+4541663491", display:"+45 41 66 34 91", img:"karen.jpg", accent:"#39d0ff" },
+  { name:"Inge Boye", phone:"+4522355339", display:"+45 22 35 53 39", img:"inge boye.jpg", accent:"#7cff6b" },
+];
+
+const AUTO_BACK_MS = 10_000;
+
+const leftCol   = document.getElementById("leftCol");
+const rightCol  = document.getElementById("rightCol");
+const centerCol = document.getElementById("centerCol");
+const layout    = document.getElementById("layout");
+const focusBox  = document.getElementById("focusBox");
+
+const clockHeaderBtn = document.getElementById("clockHeaderBtn");
+
+const overlayConfirm = document.getElementById("overlayConfirm");
+const dlgName = document.getElementById("dlgName");
+const btnYes  = document.getElementById("btnYes");
+const btnNo   = document.getElementById("btnNo");
+
+const overlayBlocked = document.getElementById("overlayBlocked");
+const blockedText = document.getElementById("blockedText");
+const btnOk = document.getElementById("btnOk");
+const blockedAudio = document.getElementById("blockedAudio");
+
+const overlayVClock = document.getElementById("overlayVClock");
+const vclockStatus = document.getElementById("vclockStatus");
+const vclockTime = document.getElementById("vclockTime");
+const vclockActivate = document.getElementById("vclockActivate");
+const vclockDeactivate = document.getElementById("vclockDeactivate");
+const vclockClose = document.getElementById("vclockClose");
+
+function indexOfPeter(){
+  return Math.max(0, contacts.findIndex(c => c.name.toLowerCase() === "peter"));
+}
+
+const peterIndex = indexOfPeter();
+const peter = contacts[peterIndex];
+const others = contacts
+  .filter((_, i) => i !== peterIndex)
+  .sort((a,b) => a.name.localeCompare(b.name, "da", { sensitivity:"base" }));
+
+const left  = others.slice(0, 4);
+const right = others.slice(4, 8);
+
+const tileOrder = [];
+const peterGlobalIndex = 4;
+let focusedIndex = peterGlobalIndex;
+
+let autoBackTimer = null;
+function clearAutoBack(){
+  if (autoBackTimer) { clearTimeout(autoBackTimer); autoBackTimer = null; }
+}
+function scheduleAutoBackIfNeeded(){
+  clearAutoBack();
+  if (overlayConfirm.classList.contains("show")) return;
+  if (overlayBlocked.classList.contains("show")) return;
+  if (overlayVClock.classList.contains("show")) return;
+
+  if (focusedIndex !== peterGlobalIndex) {
+    autoBackTimer = setTimeout(() => setFocusPeter(), AUTO_BACK_MS);
+  }
+}
+
+let pendingCall = null;
+
+function openConfirm(c){
+  pendingCall = { name:c.name, phone:c.phone };
+  dlgName.textContent = c.name.toUpperCase();
+  overlayConfirm.classList.add("show");
+  overlayConfirm.setAttribute("aria-hidden", "false");
+  clearAutoBack();
+}
+function closeConfirm(){
+  pendingCall = null;
+  overlayConfirm.classList.remove("show");
+  overlayConfirm.setAttribute("aria-hidden", "true");
+  scheduleAutoBackIfNeeded();
+}
+
+function playBlockedMp3(){
+  try{
+    blockedAudio.currentTime = 0;
+    const p = blockedAudio.play();
+    if (p && typeof p.catch === "function") p.catch(()=>{});
+  }catch(e){}
+}
+function openBlocked(message){
+  blockedText.textContent = message || "Kan ikke ringes til i dette tidsrum.";
+  overlayBlocked.classList.add("show");
+  overlayBlocked.setAttribute("aria-hidden", "false");
+  clearAutoBack();
+  playBlockedMp3();
+}
+function closeBlocked(){
+  overlayBlocked.classList.remove("show");
+  overlayBlocked.setAttribute("aria-hidden", "true");
+  scheduleAutoBackIfNeeded();
+}
+
+function refreshVClockUI(){
+  const enabled = isSimEnabled();
+  const t = getSimTime() || "02:00";
+  vclockTime.value = t;
+  vclockStatus.textContent = enabled
+    ? `Virtuel tid er AKTIV: ${t} (skærmen følger virtuel tid)`
+    : `Bruger rigtig tid. (Sæt tid og tryk AKTIVÉR)`;
+}
+function openVClock(){
+  refreshVClockUI();
+  overlayVClock.classList.add("show");
+  overlayVClock.setAttribute("aria-hidden", "false");
+  clearAutoBack();
+}
+function closeVClock(){
+  overlayVClock.classList.remove("show");
+  overlayVClock.setAttribute("aria-hidden", "true");
+  scheduleAutoBackIfNeeded();
+}
+
+function callNumber(phone){
+  location.href = `tel:${phone}`;
+}
+
+function startMessengerCall(userId){
+  if (!userId) return;
+  const intentUrl =
+    "intent://user/" + userId +
+    "#Intent;" +
+    "scheme=fb-messenger;" +
+    "package=com.facebook.orca;" +
+    "end";
+  window.location.href = intentUrl;
+}
+
+function isLockedContact(c){
+  if (!c) return false;
+  if (c.name.toLowerCase() === "peter") return false;
+  return isQuietNow();
+}
+
+overlayConfirm.addEventListener("click", (e) => { if (e.target === overlayConfirm) closeConfirm(); });
+overlayBlocked.addEventListener("click", (e) => { if (e.target === overlayBlocked) closeBlocked(); });
+overlayVClock.addEventListener("click", (e) => { if (e.target === overlayVClock) closeVClock(); });
+
+btnNo.addEventListener("click", closeConfirm);
+btnYes.addEventListener("click", () => {
+  if (!pendingCall) return;
+  const phone = pendingCall.phone;
+  closeConfirm();
+  callNumber(phone);
+});
+btnOk.addEventListener("click", closeBlocked);
+
+vclockClose.addEventListener("click", closeVClock);
+vclockActivate.addEventListener("click", () => {
+  const t = vclockTime.value || "02:00";
+  setSimTime(t);
+  setSimEnabled(true);
+  refreshVClockUI();
+  updateQuietUI();
+});
+vclockDeactivate.addEventListener("click", () => {
+  setSimEnabled(false);
+  refreshVClockUI();
+  updateQuietUI();
+});
+
+clockHeaderBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (overlayConfirm.classList.contains("show")) return;
+  if (overlayBlocked.classList.contains("show")) return;
+  if (overlayVClock.classList.contains("show")) return;
+  openVClock();
+});
+
+function makeTile(c, globalIndex, sizeClass){
+  const tile = document.createElement("div");
+  tile.className = `tile ${sizeClass}`;
+  tile.style.setProperty("--accent", c.accent);
+  tile.dataset.index = String(globalIndex);
+  tile.dataset.name = c.name;
+
+  if (sizeClass === "big") {
+    tile.innerHTML = `
+      <div class="avatarBig"><img src="${c.img}" alt="${c.name}"></div>
+      <div class="metaBig">
+        <p class="name big">${c.name}</p>
+        <p class="phone big">${c.display}</p>
+
+        <div class="callBtn big audio" role="button" aria-label="Lydopkald til ${c.name}">
+          <span class="dot"></span> LYDOPKALD
+        </div>
+
+        <div class="callBtn big video" role="button" aria-label="Videoopkald til ${c.name}">
+          <span class="dot"></span> VIDEOOPKALD
+        </div>
+      </div>
+    `;
+  } else {
+    tile.innerHTML = `
+      <div class="photo"><img src="${c.img}" alt="${c.name}"></div>
+      <div class="metaSmall">
+        <p class="name small">${c.name}</p>
+        <p class="phone small">${c.display}</p>
+        <div class="callBtn small" role="button" aria-label="Ring til ${c.name}">
+          <span class="dot"></span> RING
+        </div>
+      </div>
+    `;
+  }
+
+  function attemptCallOrMessage(){
+    if (isLockedContact(c)) {
+      openBlocked(`Kan ikke ringes til i tidsrummet ${QUIET_START}–${QUIET_END}.`);
+      return;
+    }
+    if (c.name.toLowerCase() === "peter") return;
+    openConfirm(c);
+  }
+
+  tile.addEventListener("click", () => {
+    if (overlayConfirm.classList.contains("show")) return;
+    if (overlayBlocked.classList.contains("show")) return;
+    if (overlayVClock.classList.contains("show")) return;
+
+    if (sizeClass === "small") {
+      if (focusedIndex === globalIndex) attemptCallOrMessage();
+      else setFocus(globalIndex);
+    } else {
+      if (focusedIndex !== globalIndex) setFocus(globalIndex);
+    }
+  }, { passive:true });
+
+  if (sizeClass === "big") {
+    const audioBtn = tile.querySelector(".callBtn.big.audio");
+    const videoBtn = tile.querySelector(".callBtn.big.video");
+
+    audioBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (overlayConfirm.classList.contains("show")) return;
+      if (overlayBlocked.classList.contains("show")) return;
+      if (overlayVClock.classList.contains("show")) return;
+      startMessengerCall(c.messengerUserId);
+    });
+
+    videoBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (overlayConfirm.classList.contains("show")) return;
+      if (overlayBlocked.classList.contains("show")) return;
+      if (overlayVClock.classList.contains("show")) return;
+      startMessengerCall(c.messengerUserId);
+    });
+  } else {
+    const btn = tile.querySelector(".callBtn");
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (overlayConfirm.classList.contains("show")) return;
+      if (overlayBlocked.classList.contains("show")) return;
+      if (overlayVClock.classList.contains("show")) return;
+
+      if (focusedIndex === globalIndex) attemptCallOrMessage();
+      else setFocus(globalIndex);
+    });
+  }
+
+  return tile;
+}
+
+left.forEach((c, idx) => {
+  const globalIndex = idx;
+  const tile = makeTile(c, globalIndex, "small");
+  leftCol.appendChild(tile);
+  tileOrder[globalIndex] = tile;
+});
+
+const peterTile = makeTile(peter, peterGlobalIndex, "big");
+centerCol.appendChild(peterTile);
+tileOrder[peterGlobalIndex] = peterTile;
+
+right.forEach((c, idx) => {
+  const globalIndex = 5 + idx;
+  const tile = makeTile(c, globalIndex, "small");
+  rightCol.appendChild(tile);
+  tileOrder[globalIndex] = tile;
+});
+
+function moveFocusBoxToTile(i){
+  const container = layout.getBoundingClientRect();
+  const t = tileOrder[i].getBoundingClientRect();
+  const pad = 6;
+  focusBox.style.left = `${(t.left - container.left) - pad}px`;
+  focusBox.style.top = `${(t.top - container.top ) - pad}px`;
+  focusBox.style.width = `${t.width + (pad * 2)}px`;
+  focusBox.style.height = `${t.height + (pad * 2)}px`;
+}
+function setFocus(i){
+  focusedIndex = i;
+  tileOrder.forEach((t, idx) => t.classList.toggle("focused", idx === focusedIndex));
+  moveFocusBoxToTile(focusedIndex);
+  scheduleAutoBackIfNeeded();
+}
+function setFocusPeter(){
+  closeConfirm();
+  closeBlocked();
+  closeVClock();
+  setFocus(peterGlobalIndex);
+}
+
+function updateQuietUI(){
+  const quiet = isQuietNow();
+  tileOrder.forEach((tile) => {
+    if (!tile) return;
+    const name = (tile.dataset.name || "").toLowerCase();
+    const isPeter = name === "peter";
+    const shouldQuiet = quiet && !isPeter && tile.classList.contains("small");
+
+    tile.classList.toggle("quiet", shouldQuiet);
+
+    const btn = tile.querySelector(".callBtn.small");
+    if (!btn) return;
+
+    btn.innerHTML = shouldQuiet
+      ? `<span class="dot"></span> RING (LUKKET)`
+      : `<span class="dot"></span> RING`;
+  });
+}
+
+/* Init */
+requestAnimationFrame(() => {
+  setFocusPeter();
+  refreshVClockUI();
+  updateQuietUI();
+});
+
+setInterval(updateQuietUI, 30 * 1000);
+
+window.addEventListener("pageshow", () => requestAnimationFrame(() => {
+  setFocusPeter();
+  refreshVClockUI();
+  updateQuietUI();
+}));
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    requestAnimationFrame(() => {
+      setFocusPeter();
+      refreshVClockUI();
+      updateQuietUI();
+    });
+  }
+});
+window.addEventListener("resize", () => {
+  requestAnimationFrame(() => moveFocusBoxToTile(focusedIndex));
+});
+</script>
+</body>
+</html>
